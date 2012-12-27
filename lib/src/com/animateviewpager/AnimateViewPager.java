@@ -39,14 +39,15 @@ public class AnimateViewPager extends ViewPager {
 
 	public AnimateViewPager(Context context) {
 		super(context);
-		setOnPageChangeListener(mListener);
+		super.setOnPageChangeListener(mListener);
 	}
 
 	public AnimateViewPager(Context context, AttributeSet attrs) {
 		super(context, attrs);
-		setOnPageChangeListener(mListener);
+		super.setOnPageChangeListener(mListener);
 	}
 
+	@Override
 	public void setOnPageChangeListener(final OnPageChangeListener listener) {
 		mExternalListener = listener;
 	}
@@ -85,15 +86,16 @@ public class AnimateViewPager extends ViewPager {
 	}
 
 	private void setIdle() {
+		currPercent = 0.0f;
 		for (int i = 0; i < getChildCount(); i++) {
 			AnimateFrameLayout frame = (AnimateFrameLayout) getChildAt(i);
 			frame.setState(IDLE);
-			frame.setPercent(0);
 		}
 		invalidate();
 	}
 
 	private int currFirstItem;
+	private float currPercent;
 
 	private void setEntering(int position) {
 		setStateAndSide(position, ENTERING);
@@ -111,6 +113,7 @@ public class AnimateViewPager extends ViewPager {
 
 	private void render(int position, float positionOffset, int positionOffsetPixels) {
 		currFirstItem = position;
+		currPercent = positionOffset;
 		int curr = getCurrentItem();
 		if (positionOffset != 0) {
 			setEntering(position == curr ? position + 1 : position);
@@ -119,15 +122,14 @@ public class AnimateViewPager extends ViewPager {
 	}
 
 	private View attachAnimateFrameLayout(View view) {
-		if (view instanceof AnimateFrameLayout) {
-			return view;
-		} else {
-			AnimateFrameLayout frame = new AnimateFrameLayout(view.getContext());
-			if (view.getLayoutParams() != null)
-				frame.setLayoutParams(view.getLayoutParams());
+		if (!(view instanceof AnimateFrameLayout)) {
+			AnimateFrameLayout frame = new AnimateFrameLayout(getContext());
+			frame.setLayoutParams(view.getLayoutParams() != null ? view.getLayoutParams() :
+				new ViewGroup.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 			frame.addView(view, LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
 			return frame;
 		}
+		return view;
 	}
 
 	private static final int ENTERING = 0;
@@ -141,7 +143,6 @@ public class AnimateViewPager extends ViewPager {
 
 		private int state;
 		private int side;
-		private float percent;
 
 		public AnimateFrameLayout(Context context) {
 			super(context);
@@ -149,7 +150,6 @@ public class AnimateViewPager extends ViewPager {
 
 		private void setState(int s) { state = s; }
 		private void setSide(int s) { side = s; }
-		private void setPercent(float p) { percent = p; }
 
 		@Override
 		protected void dispatchDraw(Canvas canvas) {
@@ -157,11 +157,7 @@ public class AnimateViewPager extends ViewPager {
 				(state == LEAVING ? mLeavingTransformer : null);
 			if (curr != null) {
 				canvas.save();
-				float p = percent;
-				if ((state == ENTERING && side == LEFT) || (state == LEAVING && side == RIGHT)) {
-					p = 1-percent;
-				}
-				curr.transformCanvas(canvas, p);
+				curr.transformCanvas(canvas, side == LEFT ? currPercent : 1.0f-currPercent);
 			}
 			super.dispatchDraw(canvas);
 			if (curr != null)
