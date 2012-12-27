@@ -2,15 +2,18 @@ package com.animateviewpager;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.support.v4.view.ViewPager;
-import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
 import android.widget.FrameLayout;
 
 public class AnimateViewPager extends ViewPager {
+
+	private static final String TAG = "AnimateViewPager";
 
 	private CanvasTransformer mEnteringTransformer;
 	private CanvasTransformer mLeavingTransformer;
@@ -69,7 +72,7 @@ public class AnimateViewPager extends ViewPager {
 
 	@Override
 	public void addView(View child, int width, int height) {
-		super.addView(attachAnimateFrameLayout(child), width, height);
+		super.addView(attachAnimateFrameLayout(child), width, height);	
 	}
 
 	@Override
@@ -109,16 +112,19 @@ public class AnimateViewPager extends ViewPager {
 		AnimateFrameLayout frame = (AnimateFrameLayout) getChildAt(position);
 		frame.setSide(currFirstItem == position ? LEFT : RIGHT);
 		frame.setState(state);
+		frame.invalidate();
 	}
 
 	private void render(int position, float positionOffset, int positionOffsetPixels) {
 		currFirstItem = position;
 		currPercent = positionOffset;
+		Log.v(TAG, currPercent + "");
 		int curr = getCurrentItem();
 		if (positionOffset != 0) {
 			setEntering(position == curr ? position + 1 : position);
 			setLeaving(position == curr ? position : position + 1);
 		}
+		invalidate();
 	}
 
 	private View attachAnimateFrameLayout(View view) {
@@ -127,6 +133,7 @@ public class AnimateViewPager extends ViewPager {
 			frame.setLayoutParams(view.getLayoutParams() != null ? view.getLayoutParams() :
 				new ViewGroup.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 			frame.addView(view, LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+			frame.setBackgroundColor(Color.BLACK);
 			return frame;
 		}
 		return view;
@@ -152,6 +159,11 @@ public class AnimateViewPager extends ViewPager {
 		private void setSide(int s) { side = s; }
 
 		@Override
+		public boolean onInterceptTouchEvent(MotionEvent e) {
+			return false;
+		}
+
+		@Override
 		protected void dispatchDraw(Canvas canvas) {
 			CanvasTransformer curr = state == ENTERING ? mEnteringTransformer : 
 				(state == LEAVING ? mLeavingTransformer : null);
@@ -163,6 +175,12 @@ public class AnimateViewPager extends ViewPager {
 			if (curr != null)
 				canvas.restore();
 		}
+
+		@Override
+		protected void onDraw(Canvas canvas) {
+			super.onDraw(canvas);
+		}
+
 	}
 
 }
