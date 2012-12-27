@@ -22,8 +22,8 @@ public class AnimateViewPager extends ViewPager {
 	private OnPageChangeListener mListener = new OnPageChangeListener() {
 		@Override
 		public void onPageScrollStateChanged(int state) {
-//			if (state == ViewPager.SCROLL_STATE_IDLE)
-//				setIdle();
+			if (state == ViewPager.SCROLL_STATE_IDLE)
+				setIdle();
 			if (mExternalListener != null)
 				mExternalListener.onPageScrollStateChanged(state);
 		}
