@@ -24,6 +24,20 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 		AnimateViewPager pager = (AnimateViewPager) findViewById(R.id.pager);
+		pager.setEnteringTransformer(new CanvasTransformer() {
+			@Override
+			public void transformCanvas(Canvas canvas, float percentOpen) {
+				float scale = (float) (percentOpen*0.5 + 0.5);
+				canvas.scale(scale, scale, canvas.getWidth()/2, canvas.getHeight()/2);
+			}
+		});
+		pager.setLeavingTransformer(new CanvasTransformer() {
+			@Override
+			public void transformCanvas(Canvas canvas, float percentClosed) {
+				float scale = (float) (1.0f - 0.5f*percentClosed);
+				canvas.scale(scale, scale, canvas.getWidth()/2, canvas.getHeight()/2);
+			}
+		});
 		pager.setAdapter(new Adapter());
 	}
 

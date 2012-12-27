@@ -20,7 +20,7 @@ public abstract class CanvasTransformer {
 	 * 
 	 *
 	 */
-	public class Builder {
+	public static class Builder {
 
 		private CanvasTransformer mTrans;
 

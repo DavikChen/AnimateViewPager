@@ -22,8 +22,8 @@ public class AnimateViewPager extends ViewPager {
 	private OnPageChangeListener mListener = new OnPageChangeListener() {
 		@Override
 		public void onPageScrollStateChanged(int state) {
-			if (state == ViewPager.SCROLL_STATE_IDLE)
-				setIdle();
+//			if (state == ViewPager.SCROLL_STATE_IDLE)
+//				setIdle();
 			if (mExternalListener != null)
 				mExternalListener.onPageScrollStateChanged(state);
 		}
@@ -169,7 +169,10 @@ public class AnimateViewPager extends ViewPager {
 				(state == LEAVING ? mLeavingTransformer : null);
 			if (curr != null) {
 				canvas.save();
-				curr.transformCanvas(canvas, side == LEFT ? currPercent : 1.0f-currPercent);
+				float p = side == LEFT ? currPercent : 1.0f-currPercent;
+				if (state == ENTERING)
+					p = 1-p;
+				curr.transformCanvas(canvas, p);
 			}
 			super.dispatchDraw(canvas);
 			if (curr != null)
